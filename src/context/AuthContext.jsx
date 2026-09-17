@@ -40,8 +40,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (username, email, password, role) => {
-    const formattedRole = role.startsWith("ROLE_") ? role : `ROLE_${role.toUpperCase()}`;
-    const response = await authApi.register(username, email, password, formattedRole);
+    const cleanRole = role.startsWith("ROLE_") ? role.replace("ROLE_", "") : role.toUpperCase();
+    const response = await authApi.register(username, email, password, cleanRole);
     return response.data;
   };
 
