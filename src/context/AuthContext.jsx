@@ -23,11 +23,9 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     const response = await authApi.login(username, password);
     const data = response.data;
-    
-    // Normalize role string (e.g. ROLE_STUDENT -> STUDENT or keep as returned)
+
     const rawRole = data.role || "STUDENT";
     const role = rawRole.startsWith("ROLE_") ? rawRole.replace("ROLE_", "") : rawRole;
-
     const authToken = data.token || data.accessToken;
 
     localStorage.setItem("academiax_token", authToken);
@@ -43,6 +41,56 @@ export const AuthProvider = ({ children }) => {
     const cleanRole = role.startsWith("ROLE_") ? role.replace("ROLE_", "") : role.toUpperCase();
     const response = await authApi.register(username, email, password, cleanRole);
     return response.data;
+  };
+
+  const forgotPassword = async (email) => {
+    const response = await authApi.forgotPassword(email);
+    return response.data;
+  };
+
+  const resetPassword = async (token, newPassword) => {
+    const response = await authApi.resetPassword(token, newPassword);
+    return response.data;
+  };
+
+  const verifyEmail = async (token) => {
+    const response = await authApi.verifyEmail(token);
+    return response.data;
+  };
+
+  const googleLogin = async (idToken, role = "STUDENT") => {
+    const response = await authApi.googleLogin(idToken, role);
+    const data = response.data;
+
+    const rawRole = data.role || role;
+    const cleanRole = rawRole.startsWith("ROLE_") ? rawRole.replace("ROLE_", "") : rawRole;
+    const authToken = data.token;
+
+    localStorage.setItem("academiax_token", authToken);
+    localStorage.setItem("academiax_username", data.username);
+    localStorage.setItem("academiax_role", cleanRole);
+
+    setToken(authToken);
+    setUser({ username: data.username, role: cleanRole });
+    return { username: data.username, role: cleanRole };
+  };
+
+  const ssoLogin = async (provider, idToken, role = "STUDENT") => {
+    const fn = provider === "microsoft" ? authApi.microsoftLogin : authApi.googleLogin;
+    const response = await fn(idToken, role);
+    const data = response.data;
+
+    const rawRole = data.role || role;
+    const cleanRole = rawRole.startsWith("ROLE_") ? rawRole.replace("ROLE_", "") : rawRole;
+    const authToken = data.token;
+
+    localStorage.setItem("academiax_token", authToken);
+    localStorage.setItem("academiax_username", data.username);
+    localStorage.setItem("academiax_role", cleanRole);
+
+    setToken(authToken);
+    setUser({ username: data.username, role: cleanRole });
+    return { username: data.username, role: cleanRole };
   };
 
   const logout = () => {
@@ -62,6 +110,11 @@ export const AuthProvider = ({ children }) => {
         loading,
         login,
         register,
+        forgotPassword,
+        resetPassword,
+        verifyEmail,
+        googleLogin,
+        ssoLogin,
         logout,
       }}
     >

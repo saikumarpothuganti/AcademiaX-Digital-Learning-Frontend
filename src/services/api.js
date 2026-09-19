@@ -27,6 +27,16 @@ export const authApi = {
     api.post("/api/auth/login", { username, password }),
   register: (username, email, password, role) =>
     api.post("/api/auth/register", { username, email, password, role }),
+  forgotPassword: (email) =>
+    api.post("/api/auth/forgot-password", { email }),
+  resetPassword: (token, newPassword) =>
+    api.post("/api/auth/reset-password", { token, newPassword }),
+  verifyEmail: (token) =>
+    api.get(`/api/auth/verify-email?token=${encodeURIComponent(token)}`),
+  googleLogin: (idToken, role) =>
+    api.post("/api/auth/oauth2/google", { idToken, role }),
+  microsoftLogin: (idToken, role) =>
+    api.post("/api/auth/oauth2/microsoft", { idToken, role }),
 };
 
 // Course APIs

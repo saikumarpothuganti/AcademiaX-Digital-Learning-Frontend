@@ -8,6 +8,9 @@ import AppLayout from "@/layout/AppLayout";
 // Auth Pages
 import SignIn from "@/pages/AuthPages/SignIn";
 import SignUp from "@/pages/AuthPages/SignUp";
+import ForgotPassword from "@/pages/AuthPages/ForgotPassword";
+import ResetPassword from "@/pages/AuthPages/ResetPassword";
+import VerifyEmail from "@/pages/AuthPages/VerifyEmail";
 import NotFound from "@/pages/OtherPage/NotFound";
 
 // Student Pages
@@ -48,6 +51,9 @@ export default function App() {
           {/* Public Auth Routes */}
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
 
           {/* Main App Layout */}
           <Route element={<AppLayout />}>
