@@ -92,7 +92,7 @@ export default function AdminCourses() {
                     <td className="px-4 py-3 font-semibold text-gray-800 dark:text-white">
                       {c.title}
                     </td>
-                    <td className="px-4 py-3">{c.instructor || "Unassigned"}</td>
+                    <td className="px-4 py-3">{c.instructorUsername || c.instructor || "Unassigned"}</td>
                     <td className="px-4 py-3">{c.capacity}</td>
                     <td className="px-4 py-3 font-semibold text-emerald-600 dark:text-emerald-400">
                       {c.availableSeats ?? c.capacity}

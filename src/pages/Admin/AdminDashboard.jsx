@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router";
+import { useAuth } from "@/context/AuthContext";
 import { courseApi, enrollmentApi, paymentApi } from "@/services/api";
 
 export default function AdminDashboard() {
+  const { user } = useAuth();
   const [courses, setCourses] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
   const [payments, setPayments] = useState([]);
@@ -29,10 +31,10 @@ export default function AdminDashboard() {
     };
 
     fetchAdminData();
-  }, []);
+  }, [user]);
 
   const totalTuitionRevenue = payments
-    .filter((p) => p.status === "PAID" || p.paymentStatus === "PAID")
+    .filter((p) => p.status === "SUCCESS" || p.status === "PAID" || p.paymentStatus === "PAID")
     .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
 
   return (

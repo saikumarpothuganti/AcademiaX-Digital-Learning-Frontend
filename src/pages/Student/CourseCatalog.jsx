@@ -34,7 +34,7 @@ export default function CourseCatalog() {
 
   useEffect(() => {
     fetchCourses();
-  }, []);
+  }, [user]);
 
   const handleEnrollClick = (course) => {
     setSelectedCourse(course);
@@ -136,7 +136,9 @@ export default function CourseCatalog() {
   };
 
   const filteredCourses = courses.filter((c) =>
+    c.courseCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.instructorUsername?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.instructor?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );

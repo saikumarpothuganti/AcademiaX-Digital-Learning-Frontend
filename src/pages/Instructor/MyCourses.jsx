@@ -10,6 +10,19 @@ export default function MyCourses() {
   const [deletingId, setDeletingId] = useState(null);
   const [message, setMessage] = useState("");
 
+  // Edit Modal State
+  const [editingCourse, setEditingCourse] = useState(null);
+  const [editForm, setEditForm] = useState({
+    title: "",
+    description: "",
+    capacity: 30,
+    tuitionFee: 499.99,
+    enrollmentDeadline: "",
+    status: "ACTIVE",
+  });
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState("");
+
   const fetchCourses = async () => {
     try {
       setLoading(true);
@@ -27,6 +40,67 @@ export default function MyCourses() {
       fetchCourses();
     }
   }, [user]);
+
+  const formatDateForInput = (deadlineStr) => {
+    if (!deadlineStr) return "";
+    try {
+      const d = new Date(deadlineStr);
+      if (isNaN(d.getTime())) return deadlineStr.slice(0, 16);
+      const pad = (n) => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    } catch {
+      return deadlineStr.slice(0, 16);
+    }
+  };
+
+  const handleOpenEdit = (course) => {
+    setEditingCourse(course);
+    setEditForm({
+      title: course.title || "",
+      description: course.description || "",
+      capacity: course.capacity || 30,
+      tuitionFee: course.tuitionFee || 499.99,
+      enrollmentDeadline: formatDateForInput(course.enrollmentDeadline),
+      status: course.status || "ACTIVE",
+    });
+    setEditError("");
+  };
+
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    if (!editingCourse) return;
+
+    setEditError("");
+    setSavingEdit(true);
+
+    try {
+      const formattedDeadline =
+        editForm.enrollmentDeadline.length === 16
+          ? `${editForm.enrollmentDeadline}:00`
+          : editForm.enrollmentDeadline;
+
+      const payload = {
+        title: editForm.title.trim(),
+        description: editForm.description.trim(),
+        capacity: Number(editForm.capacity),
+        tuitionFee: Number(editForm.tuitionFee),
+        enrollmentDeadline: formattedDeadline,
+        status: editForm.status,
+      };
+
+      await courseApi.updateCourse(editingCourse.id, payload);
+      setMessage(`Course #${editingCourse.id} updated successfully.`);
+      setEditingCourse(null);
+      fetchCourses();
+    } catch (err) {
+      console.error("Error updating course:", err);
+      setEditError(
+        err.response?.data?.message || err.message || "Failed to update course."
+      );
+    } finally {
+      setSavingEdit(false);
+    }
+  };
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this course?")) return;
@@ -114,13 +188,21 @@ export default function MyCourses() {
                       ${Number(c.tuitionFee || 0).toFixed(2)}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <button
-                        onClick={() => handleDelete(c.id)}
-                        disabled={deletingId === c.id}
-                        className="rounded bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400"
-                      >
-                        {deletingId === c.id ? "Deleting..." : "Delete"}
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleOpenEdit(c)}
+                          className="rounded bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-600 hover:bg-brand-100 dark:bg-brand-900/30 dark:text-brand-400"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(c.id)}
+                          disabled={deletingId === c.id}
+                          className="rounded bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400"
+                        >
+                          {deletingId === c.id ? "Deleting..." : "Delete"}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -129,6 +211,148 @@ export default function MyCourses() {
           </div>
         )}
       </div>
+
+      {/* Edit Course Modal */}
+      {editingCourse && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-xl rounded-2xl border border-gray-200 bg-white p-6 shadow-xl dark:border-gray-800 dark:bg-gray-900">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-800 dark:text-white">
+                Edit Course #{editingCourse.id}
+              </h2>
+              <button
+                onClick={() => setEditingCourse(null)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              >
+                ✕
+              </button>
+            </div>
+
+            {editError && (
+              <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                {editError}
+              </div>
+            )}
+
+            <form onSubmit={handleSaveEdit} className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Course Code
+                  </label>
+                  <input
+                    type="text"
+                    value={editingCourse.courseCode || ""}
+                    disabled
+                    className="w-full rounded-lg border border-gray-200 bg-gray-100 px-3 py-2 text-sm text-gray-500 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Instructor Username
+                  </label>
+                  <input
+                    type="text"
+                    value={user?.username || editingCourse.instructorUsername || ""}
+                    disabled
+                    className="w-full rounded-lg border border-gray-200 bg-gray-100 px-3 py-2 text-sm text-gray-500 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-400"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Course Title <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={editForm.title}
+                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                  required
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none focus:border-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Description <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  rows={3}
+                  value={editForm.description}
+                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                  required
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none focus:border-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Seat Capacity <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={editForm.capacity}
+                    onChange={(e) => setEditForm({ ...editForm, capacity: e.target.value })}
+                    required
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none focus:border-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Tuition Fee ($) <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={editForm.tuitionFee}
+                    onChange={(e) => setEditForm({ ...editForm, tuitionFee: e.target.value })}
+                    required
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none focus:border-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Enrollment Deadline <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={editForm.enrollmentDeadline}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, enrollmentDeadline: e.target.value })
+                    }
+                    required
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none focus:border-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setEditingCourse(null)}
+                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingEdit}
+                  className="rounded-lg bg-brand-500 px-5 py-2 text-sm font-medium text-white shadow hover:bg-brand-600 disabled:opacity-50"
+                >
+                  {savingEdit ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

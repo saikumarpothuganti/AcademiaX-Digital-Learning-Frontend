@@ -7,10 +7,12 @@ export default function CreateCourse() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  const [courseCode, setCourseCode] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [capacity, setCapacity] = useState(30);
   const [tuitionFee, setTuitionFee] = useState(499.99);
+  const [enrollmentDeadline, setEnrollmentDeadline] = useState("");
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -18,16 +20,29 @@ export default function CreateCourse() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (!courseCode.trim()) {
+      setError("Course Code is required.");
+      return;
+    }
+    if (!enrollmentDeadline) {
+      setError("Enrollment Deadline is required.");
+      return;
+    }
+
     setLoading(true);
 
     try {
+      const formattedDeadline =
+        enrollmentDeadline.length === 16 ? `${enrollmentDeadline}:00` : enrollmentDeadline;
+
       const courseData = {
-        title,
-        description,
-        instructor: user?.username || "Instructor",
+        courseCode: courseCode.trim(),
+        title: title.trim(),
+        description: description.trim(),
         capacity: Number(capacity),
-        availableSeats: Number(capacity),
         tuitionFee: Number(tuitionFee),
+        enrollmentDeadline: formattedDeadline,
       };
 
       await courseApi.createCourse(courseData);
@@ -61,18 +76,34 @@ export default function CreateCourse() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Course Title <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. Advanced Microservices with Spring Boot 3"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs outline-none focus:border-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-            />
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Course Code <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. CS-301"
+                value={courseCode}
+                onChange={(e) => setCourseCode(e.target.value)}
+                required
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs outline-none focus:border-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Course Title <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Advanced Microservices with Spring Boot 3"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs outline-none focus:border-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+              />
+            </div>
           </div>
 
           <div>
@@ -89,7 +120,7 @@ export default function CreateCourse() {
             />
           </div>
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Seat Capacity <span className="text-red-500">*</span>
@@ -114,6 +145,19 @@ export default function CreateCourse() {
                 min="0"
                 value={tuitionFee}
                 onChange={(e) => setTuitionFee(e.target.value)}
+                required
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs outline-none focus:border-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Enrollment Deadline <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="datetime-local"
+                value={enrollmentDeadline}
+                onChange={(e) => setEnrollmentDeadline(e.target.value)}
                 required
                 className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs outline-none focus:border-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
