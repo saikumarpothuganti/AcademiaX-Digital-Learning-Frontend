@@ -1,9 +1,6 @@
 import React, { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "flatpickr/dist/flatpickr.css";
-import "jsvectormap/dist/jsvectormap.css";
-import "simplebar-react/dist/simplebar.min.css";
-import "swiper/swiper-bundle.css";
+
 import App from "./App";
 import { AppWrapper } from "./components/common/PageMeta";
 import { LanguageProvider } from "./context/LanguageContext";

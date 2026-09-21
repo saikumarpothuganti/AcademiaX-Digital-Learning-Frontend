@@ -12,10 +12,12 @@ import ForgotPassword from "@/pages/AuthPages/ForgotPassword";
 import ResetPassword from "@/pages/AuthPages/ResetPassword";
 import VerifyEmail from "@/pages/AuthPages/VerifyEmail";
 import NotFound from "@/pages/OtherPage/NotFound";
+import Home from "@/pages/Home";
 
 // Student Pages
 import StudentDashboard from "@/pages/Student/StudentDashboard";
 import CourseCatalog from "@/pages/Student/CourseCatalog";
+import CourseDetails from "@/pages/Student/CourseDetails";
 import MyEnrollments from "@/pages/Student/MyEnrollments";
 import MyPayments from "@/pages/Student/MyPayments";
 
@@ -28,6 +30,9 @@ import CreateCourse from "@/pages/Instructor/CreateCourse";
 import AdminDashboard from "@/pages/Admin/AdminDashboard";
 import AdminCourses from "@/pages/Admin/AdminCourses";
 import AdminPayments from "@/pages/Admin/AdminPayments";
+
+// Policy Pages
+import PolicyHub from "@/pages/Policies/PolicyHub";
 
 // Smart Root Redirect based on User Role
 function RootRedirect() {
@@ -55,9 +60,11 @@ export default function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
 
+          {/* Public Home Route */}
+          <Route path="/" element={<Home />} />
+
           {/* Main App Layout */}
           <Route element={<AppLayout />}>
-            <Route path="/" element={<RootRedirect />} />
 
             {/* Student Routes */}
             <Route element={<ProtectedRoute allowedRoles={["STUDENT"]} />}>
@@ -65,9 +72,13 @@ export default function App() {
               <Route path="/student/enrollments" element={<MyEnrollments />} />
               <Route path="/student/payments" element={<MyPayments />} />
             </Route>
-
             {/* Course Catalog accessible by Student or Guest */}
             <Route path="/student/courses" element={<CourseCatalog />} />
+            <Route path="/student/courses/:courseId" element={<CourseDetails />} />
+
+            {/* Public Policy Pages */}
+            <Route path="/policies" element={<PolicyHub />} />
+            <Route path="/policies/:policyType" element={<PolicyHub />} />
 
             {/* Instructor Routes */}
             <Route element={<ProtectedRoute allowedRoles={["INSTRUCTOR"]} />}>

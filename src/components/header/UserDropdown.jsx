@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "@/context/AuthContext";
-import { Dropdown } from "../ui/dropdown/Dropdown";
+
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -65,33 +65,34 @@ export default function UserDropdown() {
         </svg>
       </button>
 
-      <Dropdown
-        isOpen={isOpen}
-        onClose={closeDropdown}
-        className="absolute right-0 mt-3 w-56 rounded-2xl border border-gray-200 bg-white p-3 shadow-xl dark:border-gray-800 dark:bg-gray-900"
-      >
-        <div className="border-b border-gray-100 pb-3 dark:border-gray-800">
-          <p className="text-sm font-bold text-gray-900 dark:text-white">{user?.username}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Role: {userRole}</p>
-        </div>
+      {isOpen && (
+        <div
+          className="absolute right-0 mt-3 w-56 rounded-2xl border border-gray-200 bg-white p-3 shadow-xl dark:border-gray-800 dark:bg-gray-900"
+          onMouseLeave={closeDropdown}
+        >
+          <div className="border-b border-gray-100 pb-3 dark:border-gray-800">
+            <p className="text-sm font-bold text-gray-900 dark:text-white">{user?.username}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Role: {userRole}</p>
+          </div>
 
-        <div className="pt-2">
-          <button
-            onClick={handleSignOut}
-            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30"
-          >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
-            </svg>
-            Sign Out
-          </button>
+          <div className="pt-2">
+            <button
+              onClick={handleSignOut}
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
+              </svg>
+              Sign Out
+            </button>
+          </div>
         </div>
-      </Dropdown>
+      )}
     </div>
   );
 }
