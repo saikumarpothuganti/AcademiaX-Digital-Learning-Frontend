@@ -45,17 +45,10 @@ export default function SignUpForm() {
     setError("");
     setLoading(true);
     try {
-      const mockToken = `${provider}_id_token_${Date.now()}`;
-      const user = await ssoLogin(provider, mockToken, role);
-      const userRole = user.role.replace("ROLE_", "");
-
-      if (userRole === "STUDENT") navigate("/student/dashboard");
-      else if (userRole === "INSTRUCTOR") navigate("/instructor/dashboard");
-      else if (userRole === "ADMIN") navigate("/admin/dashboard");
-      else navigate("/");
+      await ssoLogin(provider);
+      // Keycloak handles redirect/popup flow. AuthContext useEffect will catch the user on success.
     } catch (err) {
       setError(err.response?.data?.message || err.message || `Failed to sign up with ${provider}.`);
-    } finally {
       setLoading(false);
     }
   };
